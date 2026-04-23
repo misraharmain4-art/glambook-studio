@@ -1,5 +1,8 @@
-import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
-import { Sparkles, LayoutDashboard, Calendar, Image, DollarSign, User, Heart, Star, Users, BarChart3, Settings } from "lucide-react";
+import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { Sparkles, LayoutDashboard, Calendar, Image, DollarSign, User, Heart, Star, Users, BarChart3, Settings, LogOut } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardLayout,
@@ -27,8 +30,32 @@ const sections = {
 
 function DashboardLayout() {
   const loc = useLocation();
+  const navigate = useNavigate();
+  const { session, loading, signOut, user } = useAuth();
   const role = loc.pathname.includes("artist") ? "artist" : loc.pathname.includes("admin") ? "admin" : "client";
   const items = sections[role as keyof typeof sections];
+
+  // Auth guard — redirect unauthenticated users to /login
+  useEffect(() => {
+    if (!loading && !session) {
+      navigate({ to: "/login" });
+    }
+  }, [loading, session, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-gradient-to-br from-blush/30 via-background to-champagne/30">
+        <div className="text-sm text-muted-foreground">Loading…</div>
+      </div>
+    );
+  }
+
+  if (!session) return null;
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate({ to: "/login" });
+  };
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-blush/30 via-background to-champagne/30">
@@ -54,12 +81,18 @@ function DashboardLayout() {
           ))}
         </nav>
 
-        <div className="mt-auto pt-6 border-t">
+        <div className="mt-auto pt-6 border-t space-y-3">
+          <div className="px-3 text-xs text-muted-foreground truncate" title={user?.email ?? ""}>
+            {user?.email}
+          </div>
           <div className="flex flex-col gap-1">
             <Link to="/dashboard/customer" className="text-xs px-3 py-2 rounded-lg hover:bg-blush/60">Client view</Link>
             <Link to="/dashboard/artist" className="text-xs px-3 py-2 rounded-lg hover:bg-blush/60">Artist view</Link>
             <Link to="/dashboard/admin" className="text-xs px-3 py-2 rounded-lg hover:bg-blush/60">Admin view</Link>
           </div>
+          <Button variant="outline" size="sm" className="w-full" onClick={handleSignOut}>
+            <LogOut className="size-4" /> Sign out
+          </Button>
         </div>
       </aside>
 
