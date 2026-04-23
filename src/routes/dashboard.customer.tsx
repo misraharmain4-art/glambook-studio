@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { artists } from "@/data/artists";
 
-export const Route = createFileRoute("/dashboard/client")({
+export const Route = createFileRoute("/dashboard/customer")({
   component: ClientDash,
 });
 
