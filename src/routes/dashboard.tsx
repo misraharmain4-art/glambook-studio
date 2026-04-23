@@ -13,10 +13,10 @@ const sections = {
     { to: "/dashboard/artist", label: "Earnings", icon: DollarSign, hash: "#earnings" },
   ],
   client: [
-    { to: "/dashboard/client", label: "My Bookings", icon: Calendar },
-    { to: "/dashboard/client", label: "Saved", icon: Heart, hash: "#saved" },
-    { to: "/dashboard/client", label: "Reviews", icon: Star, hash: "#reviews" },
-    { to: "/dashboard/client", label: "Profile", icon: User, hash: "#profile" },
+    { to: "/dashboard/customer", label: "My Bookings", icon: Calendar },
+    { to: "/dashboard/customer", label: "Saved", icon: Heart, hash: "#saved" },
+    { to: "/dashboard/customer", label: "Reviews", icon: Star, hash: "#reviews" },
+    { to: "/dashboard/customer", label: "Profile", icon: User, hash: "#profile" },
   ],
   admin: [
     { to: "/dashboard/admin", label: "Overview", icon: BarChart3 },
@@ -56,7 +56,7 @@ function DashboardLayout() {
 
         <div className="mt-auto pt-6 border-t">
           <div className="flex flex-col gap-1">
-            <Link to="/dashboard/client" className="text-xs px-3 py-2 rounded-lg hover:bg-blush/60">Client view</Link>
+            <Link to="/dashboard/customer" className="text-xs px-3 py-2 rounded-lg hover:bg-blush/60">Client view</Link>
             <Link to="/dashboard/artist" className="text-xs px-3 py-2 rounded-lg hover:bg-blush/60">Artist view</Link>
             <Link to="/dashboard/admin" className="text-xs px-3 py-2 rounded-lg hover:bg-blush/60">Admin view</Link>
           </div>

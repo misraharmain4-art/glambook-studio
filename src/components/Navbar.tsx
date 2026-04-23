@@ -61,7 +61,7 @@ export function Navbar() {
             <Link to="/login">
               <Button variant="ghost" className="text-sm">Login</Button>
             </Link>
-            <Link to="/dashboard/client">
+            <Link to="/dashboard/customer">
               <Button className="gradient-rose text-white hover:opacity-90 shadow-glow border-0">
                 Book Now
               </Button>
@@ -100,7 +100,7 @@ export function Navbar() {
                   <Link to="/login" className="flex-1">
                     <Button variant="outline" className="w-full">Login</Button>
                   </Link>
-                  <Link to="/dashboard/client" className="flex-1">
+                  <Link to="/dashboard/customer" className="flex-1">
                     <Button className="w-full gradient-rose text-white border-0">Book Now</Button>
                   </Link>
                 </div>

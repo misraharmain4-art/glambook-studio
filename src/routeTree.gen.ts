@@ -12,7 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DashboardClientRouteImport } from './routes/dashboard.client'
+import { Route as DashboardCustomerRouteImport } from './routes/dashboard.customer'
 import { Route as DashboardArtistRouteImport } from './routes/dashboard.artist'
 import { Route as DashboardAdminRouteImport } from './routes/dashboard.admin'
 
@@ -31,9 +31,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardClientRoute = DashboardClientRouteImport.update({
-  id: '/client',
-  path: '/client',
+const DashboardCustomerRoute = DashboardCustomerRouteImport.update({
+  id: '/customer',
+  path: '/customer',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardArtistRoute = DashboardArtistRouteImport.update({
@@ -53,7 +53,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/artist': typeof DashboardArtistRoute
-  '/dashboard/client': typeof DashboardClientRoute
+  '/dashboard/customer': typeof DashboardCustomerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,7 +61,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/artist': typeof DashboardArtistRoute
-  '/dashboard/client': typeof DashboardClientRoute
+  '/dashboard/customer': typeof DashboardCustomerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,7 +70,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/artist': typeof DashboardArtistRoute
-  '/dashboard/client': typeof DashboardClientRoute
+  '/dashboard/customer': typeof DashboardCustomerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -80,7 +80,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard/admin'
     | '/dashboard/artist'
-    | '/dashboard/client'
+    | '/dashboard/customer'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -88,7 +88,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard/admin'
     | '/dashboard/artist'
-    | '/dashboard/client'
+    | '/dashboard/customer'
   id:
     | '__root__'
     | '/'
@@ -96,7 +96,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard/admin'
     | '/dashboard/artist'
-    | '/dashboard/client'
+    | '/dashboard/customer'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -128,11 +128,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/client': {
-      id: '/dashboard/client'
-      path: '/client'
-      fullPath: '/dashboard/client'
-      preLoaderRoute: typeof DashboardClientRouteImport
+    '/dashboard/customer': {
+      id: '/dashboard/customer'
+      path: '/customer'
+      fullPath: '/dashboard/customer'
+      preLoaderRoute: typeof DashboardCustomerRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/artist': {
@@ -155,13 +155,13 @@ declare module '@tanstack/react-router' {
 interface DashboardRouteChildren {
   DashboardAdminRoute: typeof DashboardAdminRoute
   DashboardArtistRoute: typeof DashboardArtistRoute
-  DashboardClientRoute: typeof DashboardClientRoute
+  DashboardCustomerRoute: typeof DashboardCustomerRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAdminRoute: DashboardAdminRoute,
   DashboardArtistRoute: DashboardArtistRoute,
-  DashboardClientRoute: DashboardClientRoute,
+  DashboardCustomerRoute: DashboardCustomerRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(

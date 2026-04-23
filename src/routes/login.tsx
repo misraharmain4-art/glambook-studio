@@ -21,7 +21,7 @@ function Login() {
     if (typeof window !== "undefined") {
       window.localStorage.setItem("glambook_user", JSON.stringify({ email }));
     }
-    navigate({ to: "/dashboard/client" });
+    navigate({ to: "/dashboard/customer" });
   };
 
   return (
