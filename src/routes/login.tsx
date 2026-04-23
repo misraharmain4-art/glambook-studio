@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/components/AuthProvider";
 import heroImg from "@/assets/hero-bridal.jpg";
 import logo from "@/assets/glambook-logo.png";
@@ -76,11 +77,12 @@ function Login() {
 
   const signInWithGoogle = async () => {
     setError(null);
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/dashboard/customer` },
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: `${window.location.origin}/dashboard/customer`,
     });
-    if (oauthError) setError(oauthError.message);
+    if (result.error) {
+      setError(result.error instanceof Error ? result.error.message : "Google sign-in failed");
+    }
   };
 
   return (
