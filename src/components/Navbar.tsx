@@ -37,8 +37,8 @@ export function Navbar() {
       >
         <nav className="flex items-center justify-between h-14">
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="size-9 rounded-xl gradient-rose grid place-items-center shadow-glow">
-              <Sparkles className="size-5 text-white" />
+            <div className="size-10 rounded-full overflow-hidden shadow-glow ring-2 ring-primary/30">
+              <img src={logo} alt="GlamBook logo" className="size-full object-cover" />
             </div>
             <span className="font-display text-2xl font-bold tracking-tight">
               Glam<span className="text-gradient">Book</span>
