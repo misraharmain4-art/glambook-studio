@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import logo from "@/assets/glambook-logo.png";
 
 export function LoadingScreen() {
   const [show, setShow] = useState(true);
@@ -20,11 +20,11 @@ export function LoadingScreen() {
         >
           <div className="text-center">
             <motion.div
-              animate={{ scale: [1, 1.15, 1], rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-              className="size-20 rounded-3xl gradient-rose grid place-items-center mx-auto mb-5 shadow-glow"
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 1.8, repeat: Infinity }}
+              className="size-28 rounded-full overflow-hidden mx-auto mb-5 shadow-glow ring-4 ring-primary/30"
             >
-              <Sparkles className="size-10 text-white" />
+              <img src={logo} alt="GlamBook logo" className="size-full object-cover" />
             </motion.div>
             <div className="font-display text-3xl font-bold">
               Glam<span className="text-gradient">Book</span>
