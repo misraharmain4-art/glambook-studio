@@ -1,7 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/AuthProvider";
 import heroImg from "@/assets/hero-bridal.jpg";
 import logo from "@/assets/glambook-logo.png";
 
@@ -12,16 +15,72 @@ export const Route = createFileRoute("/login")({
   component: Login,
 });
 
-function Login() {
-  const [email, setEmail] = useState("");
-  const navigate = useNavigate();
+const credentialsSchema = z.object({
+  email: z.string().trim().email({ message: "Please enter a valid email" }).max(255),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(72),
+});
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("glambook_user", JSON.stringify({ email }));
+function Login() {
+  const navigate = useNavigate();
+  const { session, loading: authLoading } = useAuth();
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Redirect once authenticated
+  useEffect(() => {
+    if (!authLoading && session) {
+      navigate({ to: "/dashboard/customer" });
     }
-    navigate({ to: "/dashboard/customer" });
+  }, [authLoading, session, navigate]);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const parsed = credentialsSchema.safeParse({ email, password });
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      if (mode === "signup") {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: parsed.data.email,
+          password: parsed.data.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/dashboard/customer`,
+            data: { display_name: displayName.trim().slice(0, 100) || undefined },
+          },
+        });
+        if (signUpError) throw signUpError;
+      } else {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: parsed.data.email,
+          password: parsed.data.password,
+        });
+        if (signInError) throw signInError;
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Authentication failed";
+      setError(message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    setError(null);
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/dashboard/customer` },
+    });
+    if (oauthError) setError(oauthError.message);
   };
 
   return (
@@ -43,24 +102,101 @@ function Login() {
             </div>
             <span className="font-display text-2xl font-bold">Glam<span className="text-gradient">Book</span></span>
           </Link>
-          <h1 className="text-3xl font-bold mb-1">Sign in</h1>
-          <p className="text-sm text-muted-foreground mb-6">Continue to your dashboard</p>
+          <h1 className="text-3xl font-bold mb-1">{mode === "signin" ? "Sign in" : "Create account"}</h1>
+          <p className="text-sm text-muted-foreground mb-6">
+            {mode === "signin" ? "Continue to your dashboard" : "Join GlamBook in seconds"}
+          </p>
+
+          <Button
+            type="button"
+            onClick={signInWithGoogle}
+            variant="outline"
+            className="w-full mb-4"
+          >
+            Continue with Google
+          </Button>
+
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-px bg-border flex-1" />
+            <span className="text-xs text-muted-foreground">or</span>
+            <div className="h-px bg-border flex-1" />
+          </div>
 
           <form onSubmit={submit} className="space-y-4">
+            {mode === "signup" && (
+              <div>
+                <label className="text-xs font-medium">Name</label>
+                <Input
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="Your name"
+                  maxLength={100}
+                  className="mt-1"
+                />
+              </div>
+            )}
             <div>
               <label className="text-xs font-medium">Email</label>
-              <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required className="mt-1" />
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                maxLength={255}
+                className="mt-1"
+                autoComplete="email"
+              />
             </div>
             <div>
               <label className="text-xs font-medium">Password</label>
-              <Input type="password" placeholder="••••••••" required className="mt-1" />
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                minLength={6}
+                maxLength={72}
+                className="mt-1"
+                autoComplete={mode === "signin" ? "current-password" : "new-password"}
+              />
             </div>
-            <Button type="submit" className="w-full gradient-rose text-white border-0 shadow-glow">
-              Sign In
+            {error && (
+              <div className="text-sm text-destructive" role="alert">{error}</div>
+            )}
+            <Button
+              type="submit"
+              disabled={submitting}
+              className="w-full gradient-rose text-white border-0 shadow-glow"
+            >
+              {submitting ? "Please wait..." : mode === "signin" ? "Sign In" : "Create account"}
             </Button>
           </form>
           <div className="text-center text-xs text-muted-foreground mt-6">
-            New here? <a href="#" className="text-primary font-medium">Create account</a>
+            {mode === "signin" ? (
+              <>
+                New here?{" "}
+                <button
+                  type="button"
+                  onClick={() => { setMode("signup"); setError(null); }}
+                  className="text-primary font-medium hover:underline"
+                >
+                  Create account
+                </button>
+              </>
+            ) : (
+              <>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => { setMode("signin"); setError(null); }}
+                  className="text-primary font-medium hover:underline"
+                >
+                  Sign in
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
