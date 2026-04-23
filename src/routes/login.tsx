@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import heroImg from "@/assets/hero-bridal.jpg";
+import logo from "@/assets/glambook-logo.png";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -38,8 +38,8 @@ function Login() {
       <div className="grid place-items-center p-6 gradient-hero">
         <div className="w-full max-w-md glass rounded-3xl p-8 shadow-lux">
           <Link to="/" className="flex items-center gap-2 mb-6">
-            <div className="size-9 rounded-xl gradient-rose grid place-items-center shadow-glow">
-              <Sparkles className="size-5 text-white" />
+            <div className="size-10 rounded-full overflow-hidden shadow-glow ring-2 ring-primary/30">
+              <img src={logo} alt="GlamBook logo" className="size-full object-cover" />
             </div>
             <span className="font-display text-2xl font-bold">Glam<span className="text-gradient">Book</span></span>
           </Link>

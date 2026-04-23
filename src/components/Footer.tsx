@@ -1,4 +1,5 @@
-import { Sparkles, Instagram, Twitter, Facebook, Mail } from "lucide-react";
+import { Instagram, Twitter, Facebook, Mail } from "lucide-react";
+import logo from "@/assets/glambook-logo.png";
 
 export function Footer() {
   return (
@@ -7,8 +8,8 @@ export function Footer() {
         <div className="grid md:grid-cols-4 gap-10">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="size-9 rounded-xl bg-white/20 grid place-items-center backdrop-blur">
-                <Sparkles className="size-5 text-white" />
+              <div className="size-10 rounded-full overflow-hidden bg-white/20 backdrop-blur ring-2 ring-white/30">
+                <img src={logo} alt="GlamBook logo" className="size-full object-cover" />
               </div>
               <span className="font-display text-2xl font-bold">GlamBook</span>
             </div>

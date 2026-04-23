@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import logo from "@/assets/glambook-logo.png";
 
 const links = [
   { label: "Home", to: "/" as const, hash: "" },
@@ -36,8 +37,8 @@ export function Navbar() {
       >
         <nav className="flex items-center justify-between h-14">
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="size-9 rounded-xl gradient-rose grid place-items-center shadow-glow">
-              <Sparkles className="size-5 text-white" />
+            <div className="size-10 rounded-full overflow-hidden shadow-glow ring-2 ring-primary/30">
+              <img src={logo} alt="GlamBook logo" className="size-full object-cover" />
             </div>
             <span className="font-display text-2xl font-bold tracking-tight">
               Glam<span className="text-gradient">Book</span>
