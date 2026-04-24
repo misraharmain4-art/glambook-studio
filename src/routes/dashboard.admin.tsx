@@ -170,23 +170,47 @@ function AdminDash() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={Users} label="Total Users" value={String(users.length)} change={`${users.filter(u => u.roles.includes("customer")).length} customers`} />
-        <StatCard icon={Sparkles} label="Total Artists" value={String(users.filter(u => u.roles.includes("artist")).length)} change="Active platform" />
-        <StatCard icon={Calendar} label="Total Bookings" value="—" change="Connect bookings" />
-        <StatCard icon={DollarSign} label="Revenue" value="—" change="Connect payments" />
+        <StatCard icon={Sparkles} label="Total Artists" value={String(stats.totalArtists)} change={`${stats.unverified} pending verify`} />
+        <StatCard icon={Calendar} label="Total Bookings" value={String(stats.totalBookings)} change="All-time" />
+        <StatCard icon={DollarSign} label="Revenue" value={`₹${stats.revenue.toLocaleString("en-IN")}`} change="Paid + advance" />
       </div>
 
       {/* Chart */}
       <div className="bg-card rounded-3xl shadow-card p-6">
-        <h3 className="font-semibold text-lg mb-6">Bookings — Last 7 months</h3>
+        <h3 className="font-semibold text-lg mb-6">Bookings & Revenue — Last 7 months</h3>
         <div className="flex items-end justify-between gap-3 h-48">
-          {heights.map((h, i) => (
-            <div key={i} className="flex-1 flex flex-col items-center gap-2">
-              <div className="w-full rounded-t-xl gradient-rose shadow-glow transition-all hover:opacity-80" style={{ height: `${h}%` }} />
-              <div className="text-xs text-muted-foreground">{months[i]}</div>
-            </div>
-          ))}
+          {monthly.map((m, i) => {
+            const max = Math.max(...monthly.map(x => x.bookings), 1);
+            const h = (m.bookings / max) * 100;
+            return (
+              <div key={i} className="flex-1 flex flex-col items-center gap-2" title={`${m.bookings} bookings · ₹${m.revenue.toLocaleString("en-IN")}`}>
+                <div className="w-full rounded-t-xl gradient-rose shadow-glow transition-all hover:opacity-80" style={{ height: `${Math.max(h, 4)}%` }} />
+                <div className="text-xs text-muted-foreground">{m.label}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
+
+      {/* Pending verifications */}
+      {pendingArtists.length > 0 && (
+        <div className="bg-card rounded-3xl shadow-card p-6">
+          <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+            <Shield className="size-5 text-primary" /> Pending artist verifications ({pendingArtists.length})
+          </h3>
+          <div className="space-y-2">
+            {pendingArtists.map((a) => (
+              <div key={a.id} className="flex items-center justify-between p-3 rounded-xl bg-blush/30">
+                <div>
+                  <div className="font-medium">{a.name}</div>
+                  <div className="text-xs text-muted-foreground">{a.city ?? "—"}</div>
+                </div>
+                <Button size="sm" className="gradient-rose text-white border-0" onClick={() => verifyArtist(a.id)}>Verify</Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Users & Roles management */}
       <div className="bg-card rounded-3xl shadow-card p-6" id="users">
