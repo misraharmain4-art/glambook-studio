@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { formatINR, formatDate, statusColor } from "@/lib/format";
 import { NotificationsBell } from "@/components/NotificationsBell";
+import { PortfolioManager } from "@/components/PortfolioManager";
+import { AvailabilityManager } from "@/components/AvailabilityManager";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/artist")({
@@ -314,6 +316,12 @@ function ArtistDash() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Portfolio + Availability */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <PortfolioManager artistId={artist.id} />
+        <AvailabilityManager artistId={artist.id} />
       </div>
 
       {/* Reviews */}
