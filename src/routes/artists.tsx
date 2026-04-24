@@ -38,17 +38,22 @@ type Artist = {
   review_count: number;
 };
 
+type Category = { id: string; name: string; slug: string };
+
 const FALLBACK_IMG = "https://images.unsplash.com/photo-1664575599618-8f6bd76fc670?w=600&q=80";
 
 function ArtistsPage() {
   const { user } = useAuth();
   const [artists, setArtists] = useState<Artist[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [artistCategoryMap, setArtistCategoryMap] = useState<Record<string, Set<string>>>({});
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [bookingArtist, setBookingArtist] = useState<Artist | null>(null);
 
   const [q, setQ] = useState("");
   const [city, setCity] = useState<string>("all");
+  const [category, setCategory] = useState<string>("all");
   const [minRating, setMinRating] = useState(0);
   const [budget, setBudget] = useState<[number, number]>([0, 20000]);
   const [sort, setSort] = useState<"recommended" | "price-asc" | "price-desc" | "rating">("recommended");
@@ -56,12 +61,23 @@ function ArtistsPage() {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const { data } = await supabase
-        .from("artists")
-        .select("id, user_id, name, city, bio, image_url, base_price, specialties, verified, rating, review_count")
-        .eq("verified", true)
-        .order("rating", { ascending: false });
-      setArtists((data as Artist[]) ?? []);
+      const [{ data: art }, { data: cats }, { data: svc }] = await Promise.all([
+        supabase
+          .from("artists")
+          .select("id, user_id, name, city, bio, image_url, base_price, specialties, verified, rating, review_count")
+          .eq("verified", true)
+          .order("rating", { ascending: false }),
+        supabase.from("categories").select("id, name, slug").order("name"),
+        supabase.from("services").select("artist_id, category_id").not("category_id", "is", null),
+      ]);
+      setArtists((art as Artist[]) ?? []);
+      setCategories((cats as Category[]) ?? []);
+      const map: Record<string, Set<string>> = {};
+      (svc ?? []).forEach((s) => {
+        if (!s.category_id) return;
+        (map[s.artist_id] ??= new Set()).add(s.category_id);
+      });
+      setArtistCategoryMap(map);
       setLoading(false);
     })();
   }, []);
@@ -85,6 +101,7 @@ function ArtistsPage() {
     let list = artists.filter((a) => {
       if (q && !a.name.toLowerCase().includes(q.toLowerCase()) && !(a.specialties ?? []).some((s) => s.toLowerCase().includes(q.toLowerCase()))) return false;
       if (city !== "all" && a.city !== city) return false;
+      if (category !== "all" && !artistCategoryMap[a.id]?.has(category)) return false;
       if (a.rating < minRating) return false;
       const price = a.base_price ?? 0;
       if (price < budget[0] || price > budget[1]) return false;
@@ -95,7 +112,7 @@ function ArtistsPage() {
     else if (sort === "rating") list = [...list].sort((a, b) => b.rating - a.rating);
     else list = [...list].sort((a, b) => (b.rating * 0.6 + b.review_count * 0.01) - (a.rating * 0.6 + a.review_count * 0.01));
     return list;
-  }, [artists, q, city, minRating, budget, sort]);
+  }, [artists, q, city, category, minRating, budget, sort, artistCategoryMap]);
 
   const toggleFav = async (artistId: string) => {
     if (!user) {
