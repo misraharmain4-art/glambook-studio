@@ -188,6 +188,31 @@ function ArtistsPage() {
             </div>
           </div>
 
+          {/* Category chips */}
+          {categories.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              <button
+                onClick={() => setCategory("all")}
+                className={`px-4 py-2 rounded-full text-xs font-medium transition ${
+                  category === "all" ? "gradient-rose text-white shadow-glow" : "glass hover:bg-blush/40"
+                }`}
+              >
+                All categories
+              </button>
+              {categories.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setCategory(c.id)}
+                  className={`px-4 py-2 rounded-full text-xs font-medium transition ${
+                    category === c.id ? "gradient-rose text-white shadow-glow" : "glass hover:bg-blush/40"
+                  }`}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Grid */}
           {loading ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -198,13 +223,13 @@ function ArtistsPage() {
               <Sparkles className="size-10 mx-auto text-primary mb-3" />
               <h3 className="text-xl font-semibold">No artists match your filters</h3>
               <p className="text-sm text-muted-foreground mt-2">Try expanding your budget or clearing filters.</p>
-              <Button className="mt-4" variant="outline" onClick={() => { setQ(""); setCity("all"); setMinRating(0); setBudget([0, 20000]); }}>Reset filters</Button>
+            <Button className="mt-4" variant="outline" onClick={() => { setQ(""); setCity("all"); setCategory("all"); setMinRating(0); setBudget([0, 20000]); }}>Reset filters</Button>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((a) => (
                 <article key={a.id} className="group bg-card rounded-3xl overflow-hidden shadow-card hover-lift transition">
-                  <div className="relative h-56 overflow-hidden">
+                  <Link to="/artists/$artistId" params={{ artistId: a.id }} className="block relative h-56 overflow-hidden">
                     <img src={a.image_url || FALLBACK_IMG} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
                     <button
                       onClick={() => toggleFav(a.id)}
