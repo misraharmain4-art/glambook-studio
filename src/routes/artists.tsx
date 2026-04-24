@@ -229,8 +229,10 @@ function ArtistsPage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((a) => (
                 <article key={a.id} className="group bg-card rounded-3xl overflow-hidden shadow-card hover-lift transition">
-                  <Link to="/artists/$artistId" params={{ artistId: a.id }} className="block relative h-56 overflow-hidden">
-                    <img src={a.image_url || FALLBACK_IMG} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+                  <div className="relative h-56 overflow-hidden">
+                    <Link to="/artists/$artistId" params={{ artistId: a.id }} className="block w-full h-full">
+                      <img src={a.image_url || FALLBACK_IMG} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+                    </Link>
                     <button
                       onClick={() => toggleFav(a.id)}
                       className="absolute top-3 right-3 size-9 grid place-items-center rounded-full glass shadow-soft hover:scale-110 transition"
@@ -246,7 +248,9 @@ function ArtistsPage() {
                   </div>
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-display text-lg font-semibold">{a.name}</h3>
+                      <Link to="/artists/$artistId" params={{ artistId: a.id }} className="font-display text-lg font-semibold hover:text-primary transition">
+                        {a.name}
+                      </Link>
                       <div className="flex items-center gap-1 text-sm">
                         <Star className="size-3.5 fill-primary text-primary" />
                         <span className="font-semibold">{Number(a.rating).toFixed(1)}</span>
@@ -266,7 +270,12 @@ function ArtistsPage() {
                         <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Starting at</div>
                         <div className="font-bold">{formatINR(a.base_price)}</div>
                       </div>
-                      <Button onClick={() => setBookingArtist(a)} className="gradient-rose text-white border-0 shadow-glow">Book</Button>
+                      <div className="flex gap-2">
+                        <Button variant="outline" asChild size="sm">
+                          <Link to="/artists/$artistId" params={{ artistId: a.id }}>View</Link>
+                        </Button>
+                        <Button onClick={() => setBookingArtist(a)} className="gradient-rose text-white border-0 shadow-glow">Book</Button>
+                      </div>
                     </div>
                   </div>
                 </article>
