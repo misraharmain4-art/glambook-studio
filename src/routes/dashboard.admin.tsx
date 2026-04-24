@@ -43,15 +43,14 @@ function AdminDash() {
   const [users, setUsers] = useState<ProfileRow[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [search, setSearch] = useState("");
-
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul"];
-  const heights = [40, 65, 50, 80, 95, 70, 110];
+  const [stats, setStats] = useState({ totalArtists: 0, unverified: 0, totalBookings: 0, revenue: 0 });
+  const [monthly, setMonthly] = useState<{ label: string; bookings: number; revenue: number }[]>([]);
+  const [pendingArtists, setPendingArtists] = useState<{ id: string; name: string; city: string | null; created_at: string }[]>([]);
 
   const isAdmin = role === "admin";
 
   const loadUsers = async () => {
     setLoadingUsers(true);
-    // RLS allows admins to read user_roles; profiles are user-scoped, so we read what we can
     const [{ data: rolesRows }, { data: profileRows }] = await Promise.all([
       supabase.from("user_roles").select("user_id, role"),
       supabase.from("profiles").select("id, email, display_name, created_at"),
@@ -78,8 +77,52 @@ function AdminDash() {
     setLoadingUsers(false);
   };
 
+  const loadStats = async () => {
+    const [{ data: artistsAll }, { data: bookingsAll }, { data: paymentsAll }] = await Promise.all([
+      supabase.from("artists").select("id, name, city, verified, created_at").order("created_at", { ascending: false }),
+      supabase.from("bookings").select("id, booking_date, amount, status, payment_status").order("booking_date", { ascending: false }),
+      supabase.from("payments").select("amount, status"),
+    ]);
+    const totalArtists = (artistsAll ?? []).length;
+    const unverified = (artistsAll ?? []).filter((a) => !a.verified);
+    const totalBookings = (bookingsAll ?? []).length;
+    const revenue = (paymentsAll ?? []).filter((p) => p.status === "paid" || p.status === "advance_paid").reduce((s, p) => s + Number(p.amount), 0);
+    setStats({ totalArtists, unverified: unverified.length, totalBookings, revenue });
+    setPendingArtists(unverified.map((a) => ({ id: a.id, name: a.name, city: a.city, created_at: a.created_at })));
+
+    // Monthly aggregation (last 7 months)
+    const buckets: Record<string, { bookings: number; revenue: number }> = {};
+    const now = new Date();
+    const labels: string[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      labels.push(d.toLocaleDateString("en-IN", { month: "short" }));
+      buckets[key] = { bookings: 0, revenue: 0 };
+    }
+    (bookingsAll ?? []).forEach((b) => {
+      const d = new Date(b.booking_date);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      if (buckets[key]) {
+        buckets[key].bookings += 1;
+        buckets[key].revenue += Number(b.amount);
+      }
+    });
+    setMonthly(Object.entries(buckets).map(([, v], i) => ({ label: labels[i], ...v })));
+  };
+
+  const verifyArtist = async (id: string) => {
+    const { error } = await supabase.from("artists").update({ verified: true }).eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Artist verified ✨");
+    loadStats();
+  };
+
   useEffect(() => {
-    if (isAdmin) loadUsers();
+    if (isAdmin) {
+      loadUsers();
+      loadStats();
+    }
   }, [isAdmin]);
 
   const grantRole = async (userId: string, newRole: AppRole) => {
