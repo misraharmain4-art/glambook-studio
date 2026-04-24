@@ -14,6 +14,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ArtistsRouteImport } from './routes/artists'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SignupArtistRouteImport } from './routes/signup.artist'
+import { Route as InvoiceBookingIdRouteImport } from './routes/invoice.$bookingId'
 import { Route as DashboardCustomerRouteImport } from './routes/dashboard.customer'
 import { Route as DashboardArtistRouteImport } from './routes/dashboard.artist'
 import { Route as DashboardAdminRouteImport } from './routes/dashboard.admin'
@@ -43,6 +44,11 @@ const SignupArtistRoute = SignupArtistRouteImport.update({
   path: '/signup/artist',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InvoiceBookingIdRoute = InvoiceBookingIdRouteImport.update({
+  id: '/invoice/$bookingId',
+  path: '/invoice/$bookingId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardCustomerRoute = DashboardCustomerRouteImport.update({
   id: '/customer',
   path: '/customer',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/artist': typeof DashboardArtistRoute
   '/dashboard/customer': typeof DashboardCustomerRoute
+  '/invoice/$bookingId': typeof InvoiceBookingIdRoute
   '/signup/artist': typeof SignupArtistRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/artist': typeof DashboardArtistRoute
   '/dashboard/customer': typeof DashboardCustomerRoute
+  '/invoice/$bookingId': typeof InvoiceBookingIdRoute
   '/signup/artist': typeof SignupArtistRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/artist': typeof DashboardArtistRoute
   '/dashboard/customer': typeof DashboardCustomerRoute
+  '/invoice/$bookingId': typeof InvoiceBookingIdRoute
   '/signup/artist': typeof SignupArtistRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/dashboard/admin'
     | '/dashboard/artist'
     | '/dashboard/customer'
+    | '/invoice/$bookingId'
     | '/signup/artist'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/dashboard/admin'
     | '/dashboard/artist'
     | '/dashboard/customer'
+    | '/invoice/$bookingId'
     | '/signup/artist'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/dashboard/admin'
     | '/dashboard/artist'
     | '/dashboard/customer'
+    | '/invoice/$bookingId'
     | '/signup/artist'
   fileRoutesById: FileRoutesById
 }
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   ArtistsRoute: typeof ArtistsRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   LoginRoute: typeof LoginRoute
+  InvoiceBookingIdRoute: typeof InvoiceBookingIdRoute
   SignupArtistRoute: typeof SignupArtistRoute
 }
 
@@ -166,6 +179,13 @@ declare module '@tanstack/react-router' {
       path: '/signup/artist'
       fullPath: '/signup/artist'
       preLoaderRoute: typeof SignupArtistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invoice/$bookingId': {
+      id: '/invoice/$bookingId'
+      path: '/invoice/$bookingId'
+      fullPath: '/invoice/$bookingId'
+      preLoaderRoute: typeof InvoiceBookingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/customer': {
@@ -213,6 +233,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArtistsRoute: ArtistsRoute,
   DashboardRoute: DashboardRouteWithChildren,
   LoginRoute: LoginRoute,
+  InvoiceBookingIdRoute: InvoiceBookingIdRoute,
   SignupArtistRoute: SignupArtistRoute,
 }
 export const routeTree = rootRouteImport
