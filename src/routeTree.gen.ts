@@ -18,6 +18,7 @@ import { Route as InvoiceBookingIdRouteImport } from './routes/invoice.$bookingI
 import { Route as DashboardCustomerRouteImport } from './routes/dashboard.customer'
 import { Route as DashboardArtistRouteImport } from './routes/dashboard.artist'
 import { Route as DashboardAdminRouteImport } from './routes/dashboard.admin'
+import { Route as ArtistsArtistIdRouteImport } from './routes/artists.$artistId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -64,12 +65,18 @@ const DashboardAdminRoute = DashboardAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => DashboardRoute,
 } as any)
+const ArtistsArtistIdRoute = ArtistsArtistIdRouteImport.update({
+  id: '/$artistId',
+  path: '/$artistId',
+  getParentRoute: () => ArtistsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/artists': typeof ArtistsRoute
+  '/artists': typeof ArtistsRouteWithChildren
   '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
+  '/artists/$artistId': typeof ArtistsArtistIdRoute
   '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/artist': typeof DashboardArtistRoute
   '/dashboard/customer': typeof DashboardCustomerRoute
@@ -78,9 +85,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/artists': typeof ArtistsRoute
+  '/artists': typeof ArtistsRouteWithChildren
   '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
+  '/artists/$artistId': typeof ArtistsArtistIdRoute
   '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/artist': typeof DashboardArtistRoute
   '/dashboard/customer': typeof DashboardCustomerRoute
@@ -90,9 +98,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/artists': typeof ArtistsRoute
+  '/artists': typeof ArtistsRouteWithChildren
   '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
+  '/artists/$artistId': typeof ArtistsArtistIdRoute
   '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/artist': typeof DashboardArtistRoute
   '/dashboard/customer': typeof DashboardCustomerRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/artists'
     | '/dashboard'
     | '/login'
+    | '/artists/$artistId'
     | '/dashboard/admin'
     | '/dashboard/artist'
     | '/dashboard/customer'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/artists'
     | '/dashboard'
     | '/login'
+    | '/artists/$artistId'
     | '/dashboard/admin'
     | '/dashboard/artist'
     | '/dashboard/customer'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/artists'
     | '/dashboard'
     | '/login'
+    | '/artists/$artistId'
     | '/dashboard/admin'
     | '/dashboard/artist'
     | '/dashboard/customer'
@@ -137,7 +149,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ArtistsRoute: typeof ArtistsRoute
+  ArtistsRoute: typeof ArtistsRouteWithChildren
   DashboardRoute: typeof DashboardRouteWithChildren
   LoginRoute: typeof LoginRoute
   InvoiceBookingIdRoute: typeof InvoiceBookingIdRoute
@@ -209,8 +221,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAdminRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/artists/$artistId': {
+      id: '/artists/$artistId'
+      path: '/$artistId'
+      fullPath: '/artists/$artistId'
+      preLoaderRoute: typeof ArtistsArtistIdRouteImport
+      parentRoute: typeof ArtistsRoute
+    }
   }
 }
+
+interface ArtistsRouteChildren {
+  ArtistsArtistIdRoute: typeof ArtistsArtistIdRoute
+}
+
+const ArtistsRouteChildren: ArtistsRouteChildren = {
+  ArtistsArtistIdRoute: ArtistsArtistIdRoute,
+}
+
+const ArtistsRouteWithChildren =
+  ArtistsRoute._addFileChildren(ArtistsRouteChildren)
 
 interface DashboardRouteChildren {
   DashboardAdminRoute: typeof DashboardAdminRoute
@@ -230,7 +260,7 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ArtistsRoute: ArtistsRoute,
+  ArtistsRoute: ArtistsRouteWithChildren,
   DashboardRoute: DashboardRouteWithChildren,
   LoginRoute: LoginRoute,
   InvoiceBookingIdRoute: InvoiceBookingIdRoute,
