@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SignupArtistRouteImport } from './routes/signup.artist'
 import { Route as DashboardCustomerRouteImport } from './routes/dashboard.customer'
 import { Route as DashboardArtistRouteImport } from './routes/dashboard.artist'
 import { Route as DashboardAdminRouteImport } from './routes/dashboard.admin'
@@ -29,6 +30,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupArtistRoute = SignupArtistRouteImport.update({
+  id: '/signup/artist',
+  path: '/signup/artist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardCustomerRoute = DashboardCustomerRouteImport.update({
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/artist': typeof DashboardArtistRoute
   '/dashboard/customer': typeof DashboardCustomerRoute
+  '/signup/artist': typeof SignupArtistRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/artist': typeof DashboardArtistRoute
   '/dashboard/customer': typeof DashboardCustomerRoute
+  '/signup/artist': typeof SignupArtistRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +79,7 @@ export interface FileRoutesById {
   '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/artist': typeof DashboardArtistRoute
   '/dashboard/customer': typeof DashboardCustomerRoute
+  '/signup/artist': typeof SignupArtistRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +90,7 @@ export interface FileRouteTypes {
     | '/dashboard/admin'
     | '/dashboard/artist'
     | '/dashboard/customer'
+    | '/signup/artist'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/dashboard/admin'
     | '/dashboard/artist'
     | '/dashboard/customer'
+    | '/signup/artist'
   id:
     | '__root__'
     | '/'
@@ -97,12 +108,14 @@ export interface FileRouteTypes {
     | '/dashboard/admin'
     | '/dashboard/artist'
     | '/dashboard/customer'
+    | '/signup/artist'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   LoginRoute: typeof LoginRoute
+  SignupArtistRoute: typeof SignupArtistRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -126,6 +139,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup/artist': {
+      id: '/signup/artist'
+      path: '/signup/artist'
+      fullPath: '/signup/artist'
+      preLoaderRoute: typeof SignupArtistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/customer': {
@@ -172,6 +192,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRouteWithChildren,
   LoginRoute: LoginRoute,
+  SignupArtistRoute: SignupArtistRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
