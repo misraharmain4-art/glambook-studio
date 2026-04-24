@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      artist_portfolio: {
+        Row: {
+          artist_id: string
+          caption: string | null
+          created_at: string
+          id: string
+          image_url: string
+          sort_order: number
+        }
+        Insert: {
+          artist_id: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          sort_order?: number
+        }
+        Update: {
+          artist_id?: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_portfolio_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artists: {
         Row: {
           base_price: number | null

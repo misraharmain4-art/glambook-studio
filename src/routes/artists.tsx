@@ -38,17 +38,22 @@ type Artist = {
   review_count: number;
 };
 
+type Category = { id: string; name: string; slug: string };
+
 const FALLBACK_IMG = "https://images.unsplash.com/photo-1664575599618-8f6bd76fc670?w=600&q=80";
 
 function ArtistsPage() {
   const { user } = useAuth();
   const [artists, setArtists] = useState<Artist[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [artistCategoryMap, setArtistCategoryMap] = useState<Record<string, Set<string>>>({});
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [bookingArtist, setBookingArtist] = useState<Artist | null>(null);
 
   const [q, setQ] = useState("");
   const [city, setCity] = useState<string>("all");
+  const [category, setCategory] = useState<string>("all");
   const [minRating, setMinRating] = useState(0);
   const [budget, setBudget] = useState<[number, number]>([0, 20000]);
   const [sort, setSort] = useState<"recommended" | "price-asc" | "price-desc" | "rating">("recommended");
@@ -56,12 +61,23 @@ function ArtistsPage() {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const { data } = await supabase
-        .from("artists")
-        .select("id, user_id, name, city, bio, image_url, base_price, specialties, verified, rating, review_count")
-        .eq("verified", true)
-        .order("rating", { ascending: false });
-      setArtists((data as Artist[]) ?? []);
+      const [{ data: art }, { data: cats }, { data: svc }] = await Promise.all([
+        supabase
+          .from("artists")
+          .select("id, user_id, name, city, bio, image_url, base_price, specialties, verified, rating, review_count")
+          .eq("verified", true)
+          .order("rating", { ascending: false }),
+        supabase.from("categories").select("id, name, slug").order("name"),
+        supabase.from("services").select("artist_id, category_id").not("category_id", "is", null),
+      ]);
+      setArtists((art as Artist[]) ?? []);
+      setCategories((cats as Category[]) ?? []);
+      const map: Record<string, Set<string>> = {};
+      (svc ?? []).forEach((s) => {
+        if (!s.category_id) return;
+        (map[s.artist_id] ??= new Set()).add(s.category_id);
+      });
+      setArtistCategoryMap(map);
       setLoading(false);
     })();
   }, []);
@@ -85,6 +101,7 @@ function ArtistsPage() {
     let list = artists.filter((a) => {
       if (q && !a.name.toLowerCase().includes(q.toLowerCase()) && !(a.specialties ?? []).some((s) => s.toLowerCase().includes(q.toLowerCase()))) return false;
       if (city !== "all" && a.city !== city) return false;
+      if (category !== "all" && !artistCategoryMap[a.id]?.has(category)) return false;
       if (a.rating < minRating) return false;
       const price = a.base_price ?? 0;
       if (price < budget[0] || price > budget[1]) return false;
@@ -95,7 +112,7 @@ function ArtistsPage() {
     else if (sort === "rating") list = [...list].sort((a, b) => b.rating - a.rating);
     else list = [...list].sort((a, b) => (b.rating * 0.6 + b.review_count * 0.01) - (a.rating * 0.6 + a.review_count * 0.01));
     return list;
-  }, [artists, q, city, minRating, budget, sort]);
+  }, [artists, q, city, category, minRating, budget, sort, artistCategoryMap]);
 
   const toggleFav = async (artistId: string) => {
     if (!user) {
@@ -171,6 +188,31 @@ function ArtistsPage() {
             </div>
           </div>
 
+          {/* Category chips */}
+          {categories.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              <button
+                onClick={() => setCategory("all")}
+                className={`px-4 py-2 rounded-full text-xs font-medium transition ${
+                  category === "all" ? "gradient-rose text-white shadow-glow" : "glass hover:bg-blush/40"
+                }`}
+              >
+                All categories
+              </button>
+              {categories.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setCategory(c.id)}
+                  className={`px-4 py-2 rounded-full text-xs font-medium transition ${
+                    category === c.id ? "gradient-rose text-white shadow-glow" : "glass hover:bg-blush/40"
+                  }`}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Grid */}
           {loading ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -181,14 +223,16 @@ function ArtistsPage() {
               <Sparkles className="size-10 mx-auto text-primary mb-3" />
               <h3 className="text-xl font-semibold">No artists match your filters</h3>
               <p className="text-sm text-muted-foreground mt-2">Try expanding your budget or clearing filters.</p>
-              <Button className="mt-4" variant="outline" onClick={() => { setQ(""); setCity("all"); setMinRating(0); setBudget([0, 20000]); }}>Reset filters</Button>
+            <Button className="mt-4" variant="outline" onClick={() => { setQ(""); setCity("all"); setCategory("all"); setMinRating(0); setBudget([0, 20000]); }}>Reset filters</Button>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((a) => (
                 <article key={a.id} className="group bg-card rounded-3xl overflow-hidden shadow-card hover-lift transition">
                   <div className="relative h-56 overflow-hidden">
-                    <img src={a.image_url || FALLBACK_IMG} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+                    <Link to="/artists/$artistId" params={{ artistId: a.id }} className="block w-full h-full">
+                      <img src={a.image_url || FALLBACK_IMG} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+                    </Link>
                     <button
                       onClick={() => toggleFav(a.id)}
                       className="absolute top-3 right-3 size-9 grid place-items-center rounded-full glass shadow-soft hover:scale-110 transition"
@@ -204,7 +248,9 @@ function ArtistsPage() {
                   </div>
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-display text-lg font-semibold">{a.name}</h3>
+                      <Link to="/artists/$artistId" params={{ artistId: a.id }} className="font-display text-lg font-semibold hover:text-primary transition">
+                        {a.name}
+                      </Link>
                       <div className="flex items-center gap-1 text-sm">
                         <Star className="size-3.5 fill-primary text-primary" />
                         <span className="font-semibold">{Number(a.rating).toFixed(1)}</span>
@@ -224,7 +270,12 @@ function ArtistsPage() {
                         <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Starting at</div>
                         <div className="font-bold">{formatINR(a.base_price)}</div>
                       </div>
-                      <Button onClick={() => setBookingArtist(a)} className="gradient-rose text-white border-0 shadow-glow">Book</Button>
+                      <div className="flex gap-2">
+                        <Button variant="outline" asChild size="sm">
+                          <Link to="/artists/$artistId" params={{ artistId: a.id }}>View</Link>
+                        </Button>
+                        <Button onClick={() => setBookingArtist(a)} className="gradient-rose text-white border-0 shadow-glow">Book</Button>
+                      </div>
                     </div>
                   </div>
                 </article>
