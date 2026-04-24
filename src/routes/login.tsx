@@ -95,7 +95,7 @@ function Login() {
         <img src={heroImg} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-br from-deep-rose/60 to-primary/40" />
         <div className="relative h-full flex flex-col justify-end p-12 text-white">
-          <h2 className="text-4xl font-display font-bold mb-3">Welcome back to GlamBook</h2>
+          <h2 className="text-4xl font-display font-bold italic mb-3">Welcome back to GlamBook</h2>
           <p className="text-white/85">Your beauty journey continues here.</p>
         </div>
       </div>
@@ -106,7 +106,7 @@ function Login() {
             <div className="size-10 rounded-full overflow-hidden shadow-glow ring-2 ring-primary/30">
               <img src={logo} alt="GlamBook logo" className="size-full object-cover" />
             </div>
-            <span className="font-display text-2xl font-bold">Glam<span className="text-gradient">Book</span></span>
+            <span className="font-display text-2xl font-bold italic">Glam<span className="text-gradient">Book</span></span>
           </Link>
           <h1 className="text-3xl font-bold mb-1">{mode === "signin" ? "Sign in" : "Create account"}</h1>
           <p className="text-sm text-muted-foreground mb-6">
