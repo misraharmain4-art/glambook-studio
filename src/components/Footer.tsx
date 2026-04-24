@@ -11,7 +11,7 @@ export function Footer() {
               <div className="size-10 rounded-full overflow-hidden bg-white/20 backdrop-blur ring-2 ring-white/30">
                 <img src={logo} alt="GlamBook logo" className="size-full object-cover" />
               </div>
-              <span className="font-display text-2xl font-bold">GlamBook</span>
+              <span className="font-display text-2xl font-bold italic">GlamBook</span>
             </div>
             <p className="text-sm text-white/80 leading-relaxed">
               India's premium platform to book trusted makeup & mehndi artists.

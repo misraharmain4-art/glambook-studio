@@ -40,7 +40,7 @@ export function Navbar() {
             <div className="size-10 rounded-full overflow-hidden shadow-glow ring-2 ring-primary/30">
               <img src={logo} alt="GlamBook logo" className="size-full object-cover" />
             </div>
-            <span className="font-display text-2xl font-bold tracking-tight">
+            <span className="font-display text-2xl font-bold italic tracking-tight">
               Glam<span className="text-gradient">Book</span>
             </span>
           </Link>
@@ -62,7 +62,7 @@ export function Navbar() {
             <Link to="/login">
               <Button variant="ghost" className="text-sm">Login</Button>
             </Link>
-            <Link to="/dashboard/customer">
+            <Link to="/artists">
               <Button className="gradient-rose text-white hover:opacity-90 shadow-glow border-0">
                 Book Now
               </Button>
@@ -101,7 +101,7 @@ export function Navbar() {
                   <Link to="/login" className="flex-1">
                     <Button variant="outline" className="w-full">Login</Button>
                   </Link>
-                  <Link to="/dashboard/customer" className="flex-1">
+                  <Link to="/artists" className="flex-1">
                     <Button className="w-full gradient-rose text-white border-0">Book Now</Button>
                   </Link>
                 </div>

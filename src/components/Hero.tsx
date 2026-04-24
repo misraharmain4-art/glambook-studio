@@ -63,12 +63,12 @@ export function Hero() {
           </div>
 
           <div className="flex flex-wrap gap-3 mt-8">
-            <Button size="lg" className="gradient-rose text-white border-0 shadow-glow hover-lift">
+            <a href="/artists" className="inline-flex items-center px-6 py-3 rounded-xl gradient-rose text-white shadow-glow hover-lift font-medium text-base">
               Book Now
-            </Button>
-            <Button size="lg" variant="outline" className="border-primary/30 hover:bg-primary/5">
+            </a>
+            <a href="/signup/artist" className="inline-flex items-center px-6 py-3 rounded-xl border border-primary/30 hover:bg-primary/5 font-medium text-base">
               Become an Artist
-            </Button>
+            </a>
           </div>
 
           <div className="flex items-center gap-6 mt-10 pt-6 border-t border-foreground/10">

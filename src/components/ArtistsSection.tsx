@@ -125,6 +125,12 @@ export function ArtistsSection() {
         {filtered.length === 0 && (
           <div className="text-center py-16 text-muted-foreground">No artists match your filters.</div>
         )}
+
+        <div className="text-center mt-10">
+          <a href="/artists" className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl gradient-rose text-white shadow-glow hover-lift font-medium">
+            Browse all verified artists →
+          </a>
+        </div>
       </div>
 
       <BookingModal artist={selected} onClose={() => setSelected(null)} />

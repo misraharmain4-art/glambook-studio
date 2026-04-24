@@ -43,15 +43,14 @@ function AdminDash() {
   const [users, setUsers] = useState<ProfileRow[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [search, setSearch] = useState("");
-
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul"];
-  const heights = [40, 65, 50, 80, 95, 70, 110];
+  const [stats, setStats] = useState({ totalArtists: 0, unverified: 0, totalBookings: 0, revenue: 0 });
+  const [monthly, setMonthly] = useState<{ label: string; bookings: number; revenue: number }[]>([]);
+  const [pendingArtists, setPendingArtists] = useState<{ id: string; name: string; city: string | null; created_at: string }[]>([]);
 
   const isAdmin = role === "admin";
 
   const loadUsers = async () => {
     setLoadingUsers(true);
-    // RLS allows admins to read user_roles; profiles are user-scoped, so we read what we can
     const [{ data: rolesRows }, { data: profileRows }] = await Promise.all([
       supabase.from("user_roles").select("user_id, role"),
       supabase.from("profiles").select("id, email, display_name, created_at"),
@@ -78,8 +77,52 @@ function AdminDash() {
     setLoadingUsers(false);
   };
 
+  const loadStats = async () => {
+    const [{ data: artistsAll }, { data: bookingsAll }, { data: paymentsAll }] = await Promise.all([
+      supabase.from("artists").select("id, name, city, verified, created_at").order("created_at", { ascending: false }),
+      supabase.from("bookings").select("id, booking_date, amount, status, payment_status").order("booking_date", { ascending: false }),
+      supabase.from("payments").select("amount, status"),
+    ]);
+    const totalArtists = (artistsAll ?? []).length;
+    const unverified = (artistsAll ?? []).filter((a) => !a.verified);
+    const totalBookings = (bookingsAll ?? []).length;
+    const revenue = (paymentsAll ?? []).filter((p) => p.status === "paid" || p.status === "advance_paid").reduce((s, p) => s + Number(p.amount), 0);
+    setStats({ totalArtists, unverified: unverified.length, totalBookings, revenue });
+    setPendingArtists(unverified.map((a) => ({ id: a.id, name: a.name, city: a.city, created_at: a.created_at })));
+
+    // Monthly aggregation (last 7 months)
+    const buckets: Record<string, { bookings: number; revenue: number }> = {};
+    const now = new Date();
+    const labels: string[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      labels.push(d.toLocaleDateString("en-IN", { month: "short" }));
+      buckets[key] = { bookings: 0, revenue: 0 };
+    }
+    (bookingsAll ?? []).forEach((b) => {
+      const d = new Date(b.booking_date);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      if (buckets[key]) {
+        buckets[key].bookings += 1;
+        buckets[key].revenue += Number(b.amount);
+      }
+    });
+    setMonthly(Object.entries(buckets).map(([, v], i) => ({ label: labels[i], ...v })));
+  };
+
+  const verifyArtist = async (id: string) => {
+    const { error } = await supabase.from("artists").update({ verified: true }).eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Artist verified ✨");
+    loadStats();
+  };
+
   useEffect(() => {
-    if (isAdmin) loadUsers();
+    if (isAdmin) {
+      loadUsers();
+      loadStats();
+    }
   }, [isAdmin]);
 
   const grantRole = async (userId: string, newRole: AppRole) => {
@@ -127,23 +170,47 @@ function AdminDash() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={Users} label="Total Users" value={String(users.length)} change={`${users.filter(u => u.roles.includes("customer")).length} customers`} />
-        <StatCard icon={Sparkles} label="Total Artists" value={String(users.filter(u => u.roles.includes("artist")).length)} change="Active platform" />
-        <StatCard icon={Calendar} label="Total Bookings" value="—" change="Connect bookings" />
-        <StatCard icon={DollarSign} label="Revenue" value="—" change="Connect payments" />
+        <StatCard icon={Sparkles} label="Total Artists" value={String(stats.totalArtists)} change={`${stats.unverified} pending verify`} />
+        <StatCard icon={Calendar} label="Total Bookings" value={String(stats.totalBookings)} change="All-time" />
+        <StatCard icon={DollarSign} label="Revenue" value={`₹${stats.revenue.toLocaleString("en-IN")}`} change="Paid + advance" />
       </div>
 
       {/* Chart */}
       <div className="bg-card rounded-3xl shadow-card p-6">
-        <h3 className="font-semibold text-lg mb-6">Bookings — Last 7 months</h3>
+        <h3 className="font-semibold text-lg mb-6">Bookings & Revenue — Last 7 months</h3>
         <div className="flex items-end justify-between gap-3 h-48">
-          {heights.map((h, i) => (
-            <div key={i} className="flex-1 flex flex-col items-center gap-2">
-              <div className="w-full rounded-t-xl gradient-rose shadow-glow transition-all hover:opacity-80" style={{ height: `${h}%` }} />
-              <div className="text-xs text-muted-foreground">{months[i]}</div>
-            </div>
-          ))}
+          {monthly.map((m, i) => {
+            const max = Math.max(...monthly.map(x => x.bookings), 1);
+            const h = (m.bookings / max) * 100;
+            return (
+              <div key={i} className="flex-1 flex flex-col items-center gap-2" title={`${m.bookings} bookings · ₹${m.revenue.toLocaleString("en-IN")}`}>
+                <div className="w-full rounded-t-xl gradient-rose shadow-glow transition-all hover:opacity-80" style={{ height: `${Math.max(h, 4)}%` }} />
+                <div className="text-xs text-muted-foreground">{m.label}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
+
+      {/* Pending verifications */}
+      {pendingArtists.length > 0 && (
+        <div className="bg-card rounded-3xl shadow-card p-6">
+          <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+            <Shield className="size-5 text-primary" /> Pending artist verifications ({pendingArtists.length})
+          </h3>
+          <div className="space-y-2">
+            {pendingArtists.map((a) => (
+              <div key={a.id} className="flex items-center justify-between p-3 rounded-xl bg-blush/30">
+                <div>
+                  <div className="font-medium">{a.name}</div>
+                  <div className="text-xs text-muted-foreground">{a.city ?? "—"}</div>
+                </div>
+                <Button size="sm" className="gradient-rose text-white border-0" onClick={() => verifyArtist(a.id)}>Verify</Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Users & Roles management */}
       <div className="bg-card rounded-3xl shadow-card p-6" id="users">
