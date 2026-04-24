@@ -86,7 +86,7 @@ function ArtistSignup() {
           <div className="size-10 rounded-full overflow-hidden shadow-glow ring-2 ring-primary/30">
             <img src={logo} alt="GlamBook" className="size-full object-cover" />
           </div>
-          <span className="font-display text-2xl font-bold">Glam<span className="text-gradient">Book</span></span>
+          <span className="font-display text-2xl font-bold italic">Glam<span className="text-gradient">Book</span></span>
         </Link>
 
         <div className="flex items-center gap-2 mb-2">

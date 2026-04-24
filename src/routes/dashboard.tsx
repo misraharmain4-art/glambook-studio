@@ -82,7 +82,7 @@ function DashboardLayout() {
           <div className="size-9 rounded-xl gradient-rose grid place-items-center shadow-glow">
             <Sparkles className="size-5 text-white" />
           </div>
-          <span className="font-display text-xl font-bold">Glam<span className="text-gradient">Book</span></span>
+          <span className="font-display text-xl font-bold italic">Glam<span className="text-gradient">Book</span></span>
         </Link>
 
         <div className="flex items-center gap-2 mb-3">
