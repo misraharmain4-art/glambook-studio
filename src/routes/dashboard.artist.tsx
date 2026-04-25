@@ -377,26 +377,64 @@ function ArtistDash() {
   );
 }
 
-function ProfileForm({ initial, onSave }: { initial: ArtistRow; onSave: (f: Partial<ArtistRow>) => void }) {
+function ProfileForm({ initial, onSave }: { initial: ArtistRow & { latitude?: number | null; longitude?: number | null }; onSave: (f: Partial<ArtistRow> & { latitude?: number | null; longitude?: number | null }) => void }) {
   const [name, setName] = useState(initial.name);
   const [city, setCity] = useState(initial.city ?? "");
   const [bio, setBio] = useState(initial.bio ?? "");
   const [imageUrl, setImageUrl] = useState(initial.image_url ?? "");
   const [basePrice, setBasePrice] = useState(String(initial.base_price ?? 0));
   const [specialties, setSpecialties] = useState((initial.specialties ?? []).join(", "));
+  const [latitude, setLatitude] = useState(initial.latitude != null ? String(initial.latitude) : "");
+  const [longitude, setLongitude] = useState(initial.longitude != null ? String(initial.longitude) : "");
+  const [locating, setLocating] = useState(false);
+
+  const useMyLocation = () => {
+    if (!navigator.geolocation) return toast.error("Geolocation not supported");
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLatitude(pos.coords.latitude.toFixed(6));
+        setLongitude(pos.coords.longitude.toFixed(6));
+        setLocating(false);
+        toast.success("Location captured");
+      },
+      (err) => {
+        setLocating(false);
+        toast.error(err.message || "Failed to get location");
+      }
+    );
+  };
+
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-3 max-h-[70vh] overflow-y-auto pr-1">
       <div><Label className="text-xs">Display name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
       <div><Label className="text-xs">City</Label><Input value={city} onChange={(e) => setCity(e.target.value)} /></div>
       <div><Label className="text-xs">Cover photo URL</Label><Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://…" /></div>
       <div><Label className="text-xs">Base price (₹)</Label><Input type="number" value={basePrice} onChange={(e) => setBasePrice(e.target.value)} /></div>
       <div><Label className="text-xs">Specialties (comma separated)</Label><Input value={specialties} onChange={(e) => setSpecialties(e.target.value)} /></div>
       <div><Label className="text-xs">Bio</Label><Textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} /></div>
+
+      <div className="rounded-xl border bg-blush/20 p-3 space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs font-semibold">Map location (for discovery)</Label>
+          <Button type="button" size="sm" variant="outline" onClick={useMyLocation} disabled={locating} className="h-7 text-xs">
+            {locating ? "Locating…" : "Use my location"}
+          </Button>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div><Label className="text-[11px] text-muted-foreground">Latitude</Label><Input type="number" step="any" value={latitude} onChange={(e) => setLatitude(e.target.value)} placeholder="19.0760" /></div>
+          <div><Label className="text-[11px] text-muted-foreground">Longitude</Label><Input type="number" step="any" value={longitude} onChange={(e) => setLongitude(e.target.value)} placeholder="72.8777" /></div>
+        </div>
+        <p className="text-[11px] text-muted-foreground">Tip: tap "Use my location" or paste coordinates from Google Maps (right-click → copy lat/lng).</p>
+      </div>
+
       <DialogFooter>
         <Button onClick={() => onSave({
           name, city: city || null, bio: bio || null, image_url: imageUrl || null,
           base_price: Number(basePrice) || 0,
           specialties: specialties.split(",").map((s) => s.trim()).filter(Boolean),
+          latitude: latitude ? Number(latitude) : null,
+          longitude: longitude ? Number(longitude) : null,
         })} className="gradient-rose text-white border-0">Save</Button>
       </DialogFooter>
     </div>
