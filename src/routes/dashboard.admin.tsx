@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { artists } from "@/data/artists";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, type AppRole } from "@/components/AuthProvider";
+import { PromoCodesManager } from "@/components/PromoCodesManager";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/admin")({
@@ -299,6 +300,9 @@ function AdminDash() {
           </table>
         </div>
       </div>
+
+      {/* Promo codes management */}
+      <PromoCodesManager />
 
       {/* Categories teaser (Phase 2 will wire CRUD) */}
       <div className="bg-card rounded-3xl shadow-card p-6" id="categories">
