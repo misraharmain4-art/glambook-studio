@@ -57,6 +57,8 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          latitude: number | null
+          longitude: number | null
           name: string
           rating: number
           review_count: number
@@ -72,6 +74,8 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          latitude?: number | null
+          longitude?: number | null
           name: string
           rating?: number
           review_count?: number
@@ -87,6 +91,8 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          latitude?: number | null
+          longitude?: number | null
           name?: string
           rating?: number
           review_count?: number
@@ -144,9 +150,11 @@ export type Database = {
           created_at: string
           customer_address: string | null
           customer_id: string
+          discount_amount: number
           id: string
           notes: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
+          promo_code_id: string | null
           service_id: string | null
           status: Database["public"]["Enums"]["booking_status"]
           updated_at: string
@@ -159,9 +167,11 @@ export type Database = {
           created_at?: string
           customer_address?: string | null
           customer_id: string
+          discount_amount?: number
           id?: string
           notes?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          promo_code_id?: string | null
           service_id?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
           updated_at?: string
@@ -174,9 +184,11 @@ export type Database = {
           created_at?: string
           customer_address?: string | null
           customer_id?: string
+          discount_amount?: number
           id?: string
           notes?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          promo_code_id?: string | null
           service_id?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
           updated_at?: string
@@ -187,6 +199,13 @@ export type Database = {
             columns: ["artist_id"]
             isOneToOne: false
             referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_promo_code_id_fkey"
+            columns: ["promo_code_id"]
+            isOneToOne: false
+            referencedRelation: "promo_codes"
             referencedColumns: ["id"]
           },
           {
@@ -250,6 +269,41 @@ export type Database = {
             columns: ["artist_id"]
             isOneToOne: false
             referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          body: string
+          booking_id: string
+          created_at: string
+          id: string
+          read: boolean
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          booking_id: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          booking_id?: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
             referencedColumns: ["id"]
           },
         ]
@@ -354,6 +408,96 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      promo_codes: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          description: string | null
+          discount_flat: number | null
+          discount_percent: number | null
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          min_order: number
+          starts_at: string | null
+          updated_at: string
+          uses_count: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          description?: string | null
+          discount_flat?: number | null
+          discount_percent?: number | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          min_order?: number
+          starts_at?: string | null
+          updated_at?: string
+          uses_count?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          description?: string | null
+          discount_flat?: number | null
+          discount_percent?: number | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          min_order?: number
+          starts_at?: string | null
+          updated_at?: string
+          uses_count?: number
+        }
+        Relationships: []
+      }
+      promo_redemptions: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          customer_id: string
+          discount_amount: number
+          id: string
+          promo_code_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          customer_id: string
+          discount_amount?: number
+          id?: string
+          promo_code_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          customer_id?: string
+          discount_amount?: number
+          id?: string
+          promo_code_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_redemptions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_redemptions_promo_code_id_fkey"
+            columns: ["promo_code_id"]
+            isOneToOne: false
+            referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
