@@ -14,6 +14,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ArtistsRouteImport } from './routes/artists'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SignupArtistRouteImport } from './routes/signup.artist'
+import { Route as MessagesBookingIdRouteImport } from './routes/messages.$bookingId'
 import { Route as InvoiceBookingIdRouteImport } from './routes/invoice.$bookingId'
 import { Route as DashboardCustomerRouteImport } from './routes/dashboard.customer'
 import { Route as DashboardArtistRouteImport } from './routes/dashboard.artist'
@@ -43,6 +44,11 @@ const IndexRoute = IndexRouteImport.update({
 const SignupArtistRoute = SignupArtistRouteImport.update({
   id: '/signup/artist',
   path: '/signup/artist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MessagesBookingIdRoute = MessagesBookingIdRouteImport.update({
+  id: '/messages/$bookingId',
+  path: '/messages/$bookingId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InvoiceBookingIdRoute = InvoiceBookingIdRouteImport.update({
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/artist': typeof DashboardArtistRoute
   '/dashboard/customer': typeof DashboardCustomerRoute
   '/invoice/$bookingId': typeof InvoiceBookingIdRoute
+  '/messages/$bookingId': typeof MessagesBookingIdRoute
   '/signup/artist': typeof SignupArtistRoute
 }
 export interface FileRoutesByTo {
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/dashboard/artist': typeof DashboardArtistRoute
   '/dashboard/customer': typeof DashboardCustomerRoute
   '/invoice/$bookingId': typeof InvoiceBookingIdRoute
+  '/messages/$bookingId': typeof MessagesBookingIdRoute
   '/signup/artist': typeof SignupArtistRoute
 }
 export interface FileRoutesById {
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/dashboard/artist': typeof DashboardArtistRoute
   '/dashboard/customer': typeof DashboardCustomerRoute
   '/invoice/$bookingId': typeof InvoiceBookingIdRoute
+  '/messages/$bookingId': typeof MessagesBookingIdRoute
   '/signup/artist': typeof SignupArtistRoute
 }
 export interface FileRouteTypes {
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/dashboard/artist'
     | '/dashboard/customer'
     | '/invoice/$bookingId'
+    | '/messages/$bookingId'
     | '/signup/artist'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/dashboard/artist'
     | '/dashboard/customer'
     | '/invoice/$bookingId'
+    | '/messages/$bookingId'
     | '/signup/artist'
   id:
     | '__root__'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/dashboard/artist'
     | '/dashboard/customer'
     | '/invoice/$bookingId'
+    | '/messages/$bookingId'
     | '/signup/artist'
   fileRoutesById: FileRoutesById
 }
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   LoginRoute: typeof LoginRoute
   InvoiceBookingIdRoute: typeof InvoiceBookingIdRoute
+  MessagesBookingIdRoute: typeof MessagesBookingIdRoute
   SignupArtistRoute: typeof SignupArtistRoute
 }
 
@@ -191,6 +204,13 @@ declare module '@tanstack/react-router' {
       path: '/signup/artist'
       fullPath: '/signup/artist'
       preLoaderRoute: typeof SignupArtistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messages/$bookingId': {
+      id: '/messages/$bookingId'
+      path: '/messages/$bookingId'
+      fullPath: '/messages/$bookingId'
+      preLoaderRoute: typeof MessagesBookingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invoice/$bookingId': {
@@ -264,6 +284,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   LoginRoute: LoginRoute,
   InvoiceBookingIdRoute: InvoiceBookingIdRoute,
+  MessagesBookingIdRoute: MessagesBookingIdRoute,
   SignupArtistRoute: SignupArtistRoute,
 }
 export const routeTree = rootRouteImport
