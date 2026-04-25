@@ -111,8 +111,6 @@ export function BookingDialog({ open, onOpenChange, artist, onBooked }: Props) {
           booking_id: booking.id,
           discount_amount: discount,
         });
-        // Best-effort uses_count increment (RLS may forbid for non-admin; ignore failure)
-        await supabase.rpc as unknown;
       }
 
       // Demo payment record (advance) for non-cash methods
