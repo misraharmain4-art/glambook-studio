@@ -1,14 +1,16 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, MapPin, Star, Sparkles, Filter, Heart, BadgeCheck, ChevronLeft } from "lucide-react";
+import { Search, MapPin, Star, Sparkles, Filter, Heart, BadgeCheck, ChevronLeft, LayoutGrid, Map as MapIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { BookingDialog } from "@/components/BookingDialog";
+import { ArtistsMap } from "@/components/ArtistsMap";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { formatINR } from "@/lib/format";
@@ -36,6 +38,8 @@ type Artist = {
   verified: boolean;
   rating: number;
   review_count: number;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 type Category = { id: string; name: string; slug: string };
@@ -44,6 +48,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1664575599618-8f6bd76fc6
 
 function ArtistsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [artists, setArtists] = useState<Artist[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [artistCategoryMap, setArtistCategoryMap] = useState<Record<string, Set<string>>>({});
@@ -64,7 +69,7 @@ function ArtistsPage() {
       const [{ data: art }, { data: cats }, { data: svc }] = await Promise.all([
         supabase
           .from("artists")
-          .select("id, user_id, name, city, bio, image_url, base_price, specialties, verified, rating, review_count")
+          .select("id, user_id, name, city, bio, image_url, base_price, specialties, verified, rating, review_count, latitude, longitude")
           .eq("verified", true)
           .order("rating", { ascending: false }),
         supabase.from("categories").select("id, name, slug").order("name"),
