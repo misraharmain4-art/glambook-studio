@@ -218,75 +218,88 @@ function ArtistsPage() {
             </div>
           )}
 
-          {/* Grid */}
-          {loading ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => <div key={i} className="bg-card rounded-3xl h-80 animate-pulse" />)}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="glass rounded-3xl p-12 text-center">
-              <Sparkles className="size-10 mx-auto text-primary mb-3" />
-              <h3 className="text-xl font-semibold">No artists match your filters</h3>
-              <p className="text-sm text-muted-foreground mt-2">Try expanding your budget or clearing filters.</p>
-            <Button className="mt-4" variant="outline" onClick={() => { setQ(""); setCity("all"); setCategory("all"); setMinRating(0); setBudget([0, 20000]); }}>Reset filters</Button>
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((a) => (
-                <article key={a.id} className="group bg-card rounded-3xl overflow-hidden shadow-card hover-lift transition">
-                  <div className="relative h-56 overflow-hidden">
-                    <Link to="/artists/$artistId" params={{ artistId: a.id }} className="block w-full h-full">
-                      <img src={a.image_url || FALLBACK_IMG} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
-                    </Link>
-                    <button
-                      onClick={() => toggleFav(a.id)}
-                      className="absolute top-3 right-3 size-9 grid place-items-center rounded-full glass shadow-soft hover:scale-110 transition"
-                      aria-label="Toggle favorite"
-                    >
-                      <Heart className={`size-4 ${favorites.has(a.id) ? "fill-primary text-primary" : "text-foreground/70"}`} />
-                    </button>
-                    {a.verified && (
-                      <Badge className="absolute top-3 left-3 bg-white/90 text-primary border-0 gap-1">
-                        <BadgeCheck className="size-3" /> Verified
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="p-5">
-                    <div className="flex items-start justify-between gap-2">
-                      <Link to="/artists/$artistId" params={{ artistId: a.id }} className="font-display text-lg font-semibold hover:text-primary transition">
-                        {a.name}
-                      </Link>
-                      <div className="flex items-center gap-1 text-sm">
-                        <Star className="size-3.5 fill-primary text-primary" />
-                        <span className="font-semibold">{Number(a.rating).toFixed(1)}</span>
-                        <span className="text-muted-foreground">({a.review_count})</span>
+          <Tabs defaultValue="grid">
+            <TabsList className="mb-5">
+              <TabsTrigger value="grid"><LayoutGrid className="size-3.5" /> Grid</TabsTrigger>
+              <TabsTrigger value="map"><MapIcon className="size-3.5" /> Map</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="grid">
+              {loading ? (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => <div key={i} className="bg-card rounded-3xl h-80 animate-pulse" />)}
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="glass rounded-3xl p-12 text-center">
+                  <Sparkles className="size-10 mx-auto text-primary mb-3" />
+                  <h3 className="text-xl font-semibold">No artists match your filters</h3>
+                  <p className="text-sm text-muted-foreground mt-2">Try expanding your budget or clearing filters.</p>
+                  <Button className="mt-4" variant="outline" onClick={() => { setQ(""); setCity("all"); setCategory("all"); setMinRating(0); setBudget([0, 20000]); }}>Reset filters</Button>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filtered.map((a) => (
+                    <article key={a.id} className="group bg-card rounded-3xl overflow-hidden shadow-card hover-lift transition">
+                      <div className="relative h-56 overflow-hidden">
+                        <Link to="/artists/$artistId" params={{ artistId: a.id }} className="block w-full h-full">
+                          <img src={a.image_url || FALLBACK_IMG} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+                        </Link>
+                        <button onClick={() => toggleFav(a.id)} className="absolute top-3 right-3 size-9 grid place-items-center rounded-full glass shadow-soft hover:scale-110 transition" aria-label="Toggle favorite">
+                          <Heart className={`size-4 ${favorites.has(a.id) ? "fill-primary text-primary" : "text-foreground/70"}`} />
+                        </button>
+                        {a.verified && (
+                          <Badge className="absolute top-3 left-3 bg-white/90 text-primary border-0 gap-1"><BadgeCheck className="size-3" /> Verified</Badge>
+                        )}
                       </div>
-                    </div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                      <MapPin className="size-3" /> {a.city || "—"}
-                    </div>
-                    <div className="flex flex-wrap gap-1.5 mt-3">
-                      {(a.specialties ?? []).slice(0, 3).map((s) => (
-                        <Badge key={s} className="bg-blush/60 text-deep-rose border-0 font-normal">{s}</Badge>
-                      ))}
-                    </div>
-                    <div className="mt-4 flex items-center justify-between">
-                      <div>
-                        <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Starting at</div>
-                        <div className="font-bold">{formatINR(a.base_price)}</div>
+                      <div className="p-5">
+                        <div className="flex items-start justify-between gap-2">
+                          <Link to="/artists/$artistId" params={{ artistId: a.id }} className="font-display text-lg font-semibold hover:text-primary transition">{a.name}</Link>
+                          <div className="flex items-center gap-1 text-sm">
+                            <Star className="size-3.5 fill-primary text-primary" />
+                            <span className="font-semibold">{Number(a.rating).toFixed(1)}</span>
+                            <span className="text-muted-foreground">({a.review_count})</span>
+                          </div>
+                        </div>
+                        <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1"><MapPin className="size-3" /> {a.city || "—"}</div>
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          {(a.specialties ?? []).slice(0, 3).map((s) => (
+                            <Badge key={s} className="bg-blush/60 text-deep-rose border-0 font-normal">{s}</Badge>
+                          ))}
+                        </div>
+                        <div className="mt-4 flex items-center justify-between">
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Starting at</div>
+                            <div className="font-bold">{formatINR(a.base_price)}</div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" asChild size="sm"><Link to="/artists/$artistId" params={{ artistId: a.id }}>View</Link></Button>
+                            <Button onClick={() => setBookingArtist(a)} className="gradient-rose text-white border-0 shadow-glow">Book</Button>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" asChild size="sm">
-                          <Link to="/artists/$artistId" params={{ artistId: a.id }}>View</Link>
-                        </Button>
-                        <Button onClick={() => setBookingArtist(a)} className="gradient-rose text-white border-0 shadow-glow">Book</Button>
-                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="map">
+              {(() => {
+                const mappable = filtered.filter((a) => a.latitude != null && a.longitude != null).map((a) => ({ ...a, latitude: a.latitude as number, longitude: a.longitude as number }));
+                if (loading) return <div className="bg-card rounded-3xl h-[520px] animate-pulse" />;
+                if (mappable.length === 0) {
+                  return (
+                    <div className="glass rounded-3xl p-12 text-center">
+                      <MapIcon className="size-10 mx-auto text-primary mb-3" />
+                      <h3 className="text-xl font-semibold">No mapped locations yet</h3>
+                      <p className="text-sm text-muted-foreground mt-2">Artists haven't shared their coordinates. Switch to grid to browse all {filtered.length}.</p>
                     </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
+                  );
+                }
+                return <ArtistsMap artists={mappable} onPinClick={(id) => navigate({ to: "/artists/$artistId", params: { artistId: id } })} />;
+              })()}
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
       <Footer />
