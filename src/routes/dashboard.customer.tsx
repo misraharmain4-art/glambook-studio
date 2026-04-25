@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
-import { Calendar, Heart, Star, MapPin, X, RefreshCcw, Sparkles, FileText, BellRing } from "lucide-react";
+import { Calendar, Heart, Star, MapPin, X, RefreshCcw, Sparkles, FileText, BellRing, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -163,7 +163,10 @@ function ClientDash() {
                   <div className="text-xs mt-2 flex items-center gap-2 text-primary">
                     <Calendar className="size-3" /> {formatDate(b.booking_date)} · {b.booking_time.slice(0, 5)}
                   </div>
-                  <div className="flex gap-2 mt-3">
+                  <div className="flex gap-2 mt-3 flex-wrap">
+                    <Link to="/messages/$bookingId" params={{ bookingId: b.id }}>
+                      <Button size="sm" variant="outline"><MessageCircle className="size-3" /> Chat</Button>
+                    </Link>
                     <Button size="sm" variant="outline" onClick={() => { setReschedule(b); setNewDate(b.booking_date); setNewTime(b.booking_time.slice(0, 5)); }}>
                       <RefreshCcw className="size-3" /> Reschedule
                     </Button>
