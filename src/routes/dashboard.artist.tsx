@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
-import { Calendar, DollarSign, Star, Users, Plus, Check, X, Pencil, Trash2, BadgeCheck } from "lucide-react";
+import { Calendar, DollarSign, Star, Users, Plus, Check, X, Pencil, Trash2, BadgeCheck, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -268,6 +268,9 @@ function ArtistDash() {
                       <td className="py-3 text-right font-semibold">{formatINR(b.amount)}</td>
                       <td className="py-3 text-right">
                         <div className="inline-flex gap-1.5">
+                          <Link to="/messages/$bookingId" params={{ bookingId: b.id }}>
+                            <Button size="sm" variant="ghost" className="h-7"><MessageCircle className="size-3" /></Button>
+                          </Link>
                           {b.status === "pending" && (
                             <>
                               <Button size="sm" className="h-7 gradient-rose text-white border-0" onClick={() => updateBookingStatus(b.id, "confirmed")}><Check className="size-3" /></Button>
