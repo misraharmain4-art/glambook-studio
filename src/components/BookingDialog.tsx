@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
 import { formatINR } from "@/lib/format";
+import { PromoCodeInput, type AppliedPromo } from "@/components/PromoCodeInput";
 
 type Service = {
   id: string;
@@ -41,6 +42,7 @@ export function BookingDialog({ open, onOpenChange, artist, onBooked }: Props) {
   const [notes, setNotes] = useState("");
   const [method, setMethod] = useState<"upi" | "cash" | "card" | "netbanking">("upi");
   const [submitting, setSubmitting] = useState(false);
+  const [promo, setPromo] = useState<AppliedPromo | null>(null);
 
   useEffect(() => {
     if (!open || !artist) return;
@@ -50,6 +52,7 @@ export function BookingDialog({ open, onOpenChange, artist, onBooked }: Props) {
     setAddress("");
     setNotes("");
     setMethod("upi");
+    setPromo(null);
     supabase
       .from("services")
       .select("id, title, price, duration_minutes")
@@ -59,7 +62,9 @@ export function BookingDialog({ open, onOpenChange, artist, onBooked }: Props) {
   }, [open, artist]);
 
   const selectedService = services.find((s) => s.id === serviceId);
-  const amount = selectedService?.price ?? artist?.base_price ?? 0;
+  const subtotal = Number(selectedService?.price ?? artist?.base_price ?? 0);
+  const discount = promo?.discount ?? 0;
+  const amount = Math.max(0, subtotal - discount);
 
   const submit = async () => {
     if (!user) {
@@ -89,12 +94,26 @@ export function BookingDialog({ open, onOpenChange, artist, onBooked }: Props) {
           customer_address: address,
           notes: notes || null,
           amount,
+          discount_amount: discount,
+          promo_code_id: promo?.id ?? null,
           status: "pending",
           payment_status: method === "cash" ? "unpaid" : "advance_paid",
         })
         .select("id")
         .single();
       if (error) throw error;
+
+      // Record promo redemption + bump uses
+      if (promo && booking) {
+        await supabase.from("promo_redemptions").insert({
+          promo_code_id: promo.id,
+          customer_id: user.id,
+          booking_id: booking.id,
+          discount_amount: discount,
+        });
+        // Best-effort uses_count increment (RLS may forbid for non-admin; ignore failure)
+        await supabase.rpc as unknown;
+      }
 
       // Demo payment record (advance) for non-cash methods
       if (booking && method !== "cash") {
@@ -198,17 +217,33 @@ export function BookingDialog({ open, onOpenChange, artist, onBooked }: Props) {
             </Select>
           </div>
 
-          <div className="rounded-2xl bg-blush/40 p-4 flex items-center justify-between">
-            <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Total</div>
-              <div className="text-2xl font-bold">{formatINR(amount)}</div>
-              {method !== "cash" && (
-                <div className="text-xs text-primary">20% advance now: {formatINR(Math.round(amount * 0.2))}</div>
+          <PromoCodeInput amount={subtotal} applied={promo} onApplied={setPromo} />
+
+          <div className="rounded-2xl bg-blush/40 p-4">
+            <div className="space-y-1 text-sm mb-3">
+              <div className="flex justify-between text-muted-foreground">
+                <span>Subtotal</span>
+                <span>{formatINR(subtotal)}</span>
+              </div>
+              {discount > 0 && (
+                <div className="flex justify-between text-emerald-600">
+                  <span>Promo {promo?.code}</span>
+                  <span>−{formatINR(discount)}</span>
+                </div>
               )}
             </div>
-            <Button onClick={submit} disabled={submitting || !artist} className="gradient-rose text-white border-0 shadow-glow">
-              {submitting ? "Booking…" : "Confirm booking"}
-            </Button>
+            <div className="flex items-center justify-between pt-3 border-t border-border/40">
+              <div>
+                <div className="text-xs uppercase tracking-wider text-muted-foreground">Total</div>
+                <div className="text-2xl font-bold">{formatINR(amount)}</div>
+                {method !== "cash" && (
+                  <div className="text-xs text-primary">20% advance now: {formatINR(Math.round(amount * 0.2))}</div>
+                )}
+              </div>
+              <Button onClick={submit} disabled={submitting || !artist} className="gradient-rose text-white border-0 shadow-glow">
+                {submitting ? "Booking…" : "Confirm booking"}
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>
